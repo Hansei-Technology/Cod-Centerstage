@@ -57,7 +57,7 @@ public class MUIE_PESTE_POD extends LinearOpMode {
             case LEFT: {
                 mainTrajectoryBuilder
                         .UNSTABLE_addTemporalMarkerOffset(1.8, () -> cleste.openGripper())
-                        .lineToLinearHeading(new Pose2d(15, 10, Math.toRadians(315)));
+                        .lineToLinearHeading(new Pose2d(15, -3, Math.toRadians(45)));
                 return mainTrajectoryBuilder.build();
             }
             case RIGHT: {
