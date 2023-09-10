@@ -60,17 +60,17 @@ public class MUIE_ROSIE_DREAPTA extends LinearOpMode {
             case RIGHT: {
                 mainTrajectoryBuilder
                         .UNSTABLE_addTemporalMarkerOffset(1.8, () -> cleste.openGripper())
-                        .lineToLinearHeading(new Pose2d(15, -10, Math.toRadians(0)))
+                        .lineToLinearHeading(new Pose2d(15, -15, Math.toRadians(0)))
                         .setReversed(true)
-                        .lineToLinearHeading(new Pose2d(10, -58, Math.toRadians(0)));
+                        .lineToLinearHeading(new Pose2d(10, -62, Math.toRadians(0)));
                 return mainTrajectoryBuilder.build();
             }
             case LEFT: {
                 mainTrajectoryBuilder
                         .UNSTABLE_addTemporalMarkerOffset(1.8, () -> cleste.openGripper())
-                        .lineToLinearHeading(new Pose2d(18, 13, Math.toRadians(315)))
+                        .lineToLinearHeading(new Pose2d(18, 15, Math.toRadians(320)))
                         .setReversed(true)
-                        .lineToLinearHeading(new Pose2d(10, -53, Math.toRadians(0)));
+                        .lineToLinearHeading(new Pose2d(10, -62, Math.toRadians(0)));
                 return mainTrajectoryBuilder.build();
             }
 
