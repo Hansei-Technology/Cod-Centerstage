@@ -32,6 +32,8 @@ public class MUIE_ROSIE_DREAPTA extends LinearOpMode {
         cleste = new Cleste(hardwareMap, "cleste");
         TrajectorySequence mainTrajectory = null;
         cleste.closeGripper();
+        brat.jointStatus = Brat.JointStatus.INIT_AUTO;
+        brat.updateJoint();
         while(opModeInInit()) {
             CameraDetector.Result result = camera.detect();
             telemetry.addLine("Location " + result);
@@ -50,8 +52,7 @@ public class MUIE_ROSIE_DREAPTA extends LinearOpMode {
             case CENTER: {
                 mainTrajectoryBuilder
                         .UNSTABLE_addTemporalMarkerOffset(0, () -> {
-                            brat.jointStatus = Brat.JointStatus.AUTO;
-                            brat.updateJoint();
+                            brat.joint.setPosition(0.47);
                         })
                         .UNSTABLE_addTemporalMarkerOffset(1.8, () -> cleste.openGripper())
                         .lineToLinearHeading(new Pose2d(23, -6, Math.toRadians(0)))
@@ -62,8 +63,7 @@ public class MUIE_ROSIE_DREAPTA extends LinearOpMode {
             case RIGHT: {
                 mainTrajectoryBuilder
                         .UNSTABLE_addTemporalMarkerOffset(0, () -> {
-                            brat.jointStatus = Brat.JointStatus.AUTO;
-                            brat.updateJoint();
+                            brat.joint.setPosition(0.47);
                         })
                         .UNSTABLE_addTemporalMarkerOffset(1.8, () -> cleste.openGripper())
                         .lineToLinearHeading(new Pose2d(15, -15, Math.toRadians(0)))
@@ -74,8 +74,7 @@ public class MUIE_ROSIE_DREAPTA extends LinearOpMode {
             case LEFT: {
                 mainTrajectoryBuilder
                         .UNSTABLE_addTemporalMarkerOffset(0, () -> {
-                            brat.jointStatus = Brat.JointStatus.AUTO;
-                            brat.updateJoint();
+                            brat.joint.setPosition(0.47);
                         })
                         .UNSTABLE_addTemporalMarkerOffset(1.8, () -> cleste.openGripper())
                         .lineToLinearHeading(new Pose2d(18, 15, Math.toRadians(320)))
@@ -83,13 +82,18 @@ public class MUIE_ROSIE_DREAPTA extends LinearOpMode {
                         .lineToLinearHeading(new Pose2d(10, -62, Math.toRadians(0)));
                 return mainTrajectoryBuilder.build();
             }
-
+            case NONE: {
+                mainTrajectoryBuilder
+                        .UNSTABLE_addTemporalMarkerOffset(0.2, () -> {
+                            brat.joint.setPosition(0.47);
+                        })
+                        .UNSTABLE_addTemporalMarkerOffset(1.8, () -> cleste.openGripper())
+                        .lineToLinearHeading(new Pose2d(23, -6, Math.toRadians(0)))
+                        .setReversed(true)
+                        .lineToLinearHeading(new Pose2d(10, -62, Math.toRadians(0)));
+                return mainTrajectoryBuilder.build();
+            }
         }
-        mainTrajectoryBuilder
-                .UNSTABLE_addTemporalMarkerOffset(1.8, () -> cleste.openGripper())
-                .lineToLinearHeading(new Pose2d(26, 0, Math.toRadians(0)))
-                .setReversed(true)
-                .lineToLinearHeading(new Pose2d(10, 58, Math.toRadians(0)));
         return  mainTrajectoryBuilder.build();
     }
 }

@@ -31,6 +31,8 @@ public class MUIE_PESTE_POD extends LinearOpMode {
         cleste = new Cleste(hardwareMap, "cleste");
         TrajectorySequence mainTrajectory = null;
         cleste.closeGripper();
+        brat.jointStatus = Brat.JointStatus.INIT_AUTO;
+        brat.updateJoint();
         while(opModeInInit()) {
             CameraDetector.Result result = camera.detect();
             telemetry.addLine("Location " + result);
@@ -49,8 +51,7 @@ public class MUIE_PESTE_POD extends LinearOpMode {
             case CENTER: {
                 mainTrajectoryBuilder
                         .UNSTABLE_addTemporalMarkerOffset(0, () -> {
-                            brat.jointStatus = Brat.JointStatus.AUTO;
-                            brat.updateJoint();
+                            brat.joint.setPosition(0.47);
                         })
                         .UNSTABLE_addTemporalMarkerOffset(1.8, () -> cleste.openGripper())
                         .lineToLinearHeading(new Pose2d(26, 0, Math.toRadians(0)));
@@ -59,8 +60,7 @@ public class MUIE_PESTE_POD extends LinearOpMode {
             case LEFT: {
                 mainTrajectoryBuilder
                         .UNSTABLE_addTemporalMarkerOffset(0, () -> {
-                            brat.jointStatus = Brat.JointStatus.AUTO;
-                            brat.updateJoint();
+                            brat.joint.setPosition(0.47);
                         })
                         .UNSTABLE_addTemporalMarkerOffset(1.8, () -> cleste.openGripper())
                         .lineToLinearHeading(new Pose2d(15, -3, Math.toRadians(45)));
@@ -69,18 +69,25 @@ public class MUIE_PESTE_POD extends LinearOpMode {
             case RIGHT: {
                 mainTrajectoryBuilder
                         .UNSTABLE_addTemporalMarkerOffset(0, () -> {
-                            brat.jointStatus = Brat.JointStatus.AUTO;
-                            brat.updateJoint();
+                            brat.joint.setPosition(0.47);
                         })
                         .UNSTABLE_addTemporalMarkerOffset(1.8, () -> cleste.openGripper())
                         .lineToLinearHeading(new Pose2d(18, -13, Math.toRadians(270)));
                 return mainTrajectoryBuilder.build();
             }
+            case NONE: {
+                mainTrajectoryBuilder
+                        .UNSTABLE_addTemporalMarkerOffset(0, () -> {
+                            brat.joint.setPosition(0.47);
+                        })
+                        .UNSTABLE_addTemporalMarkerOffset(1.8, () -> cleste.openGripper())
+                        .lineToLinearHeading(new Pose2d(23, -6, Math.toRadians(0)))
+                        .setReversed(true)
+                        .lineToLinearHeading(new Pose2d(10, -62, Math.toRadians(0)));
+                return  mainTrajectoryBuilder.build();
+            }
 
         }
-        mainTrajectoryBuilder
-                .UNSTABLE_addTemporalMarkerOffset(1.8, () -> cleste.openGripper())
-                .lineToLinearHeading(new Pose2d(26, 0, Math.toRadians(0)));
         return  mainTrajectoryBuilder.build();
     }
 }

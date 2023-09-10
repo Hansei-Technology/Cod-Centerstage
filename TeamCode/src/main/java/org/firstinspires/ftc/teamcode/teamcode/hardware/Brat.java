@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class Brat {
 
     public DcMotorEx motor;
-    Servo joint;
+    public Servo joint;
 
     public class PosBrat {
         public double POS_SERVO;
@@ -25,7 +25,8 @@ public class Brat {
         GRAB,
         IDLE,
         INIT,
-        AUTO
+        AUTO,
+        INIT_AUTO
     }
 
     public JointStatus jointStatus = JointStatus.INIT;
@@ -155,6 +156,9 @@ public class Brat {
             }
             case AUTO: {
                 joint.setPosition(0.45);
+            }
+            case INIT_AUTO: {
+                joint.setPosition(0.39);
             }
         }
     }
