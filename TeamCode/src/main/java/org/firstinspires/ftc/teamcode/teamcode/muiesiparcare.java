@@ -32,8 +32,6 @@ public class muiesiparcare extends LinearOpMode {
         cleste = new Cleste(hardwareMap, "cleste");
         TrajectorySequence mainTrajectory = null;
         cleste.closeGripper();
-        brat.jointStatus = Brat.JointStatus.AUTO;
-        brat.updateJoint();
         while(opModeInInit()) {
             CameraDetector.Result result = camera.detect();
             telemetry.addLine("Location " + result);
@@ -42,6 +40,8 @@ public class muiesiparcare extends LinearOpMode {
         }
         camera.stop();
         if (isStopRequested()) return;
+        brat.jointStatus = Brat.JointStatus.AUTO;
+        brat.updateJoint();
         drive.setPoseEstimate(START_POSE);
         drive.followTrajectorySequence(mainTrajectory);
     }
