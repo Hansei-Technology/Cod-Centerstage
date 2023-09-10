@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.teamcode;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.fasterxml.jackson.databind.JsonSerializer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
@@ -17,7 +16,7 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 
 @Autonomous
 @Config
-public class muiesiparcare extends LinearOpMode {
+public class MUIE_ALBASTRA_STANGA extends LinearOpMode {
     public static Pose2d START_POSE = new Pose2d(0, 0, 0);
     public SampleMecanumDrive drive;
     public CameraDetector camera;
