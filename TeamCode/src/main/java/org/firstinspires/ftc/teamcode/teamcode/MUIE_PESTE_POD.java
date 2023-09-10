@@ -39,8 +39,6 @@ public class MUIE_PESTE_POD extends LinearOpMode {
         }
         camera.stop();
         if (isStopRequested()) return;
-        brat.jointStatus = Brat.JointStatus.AUTO;
-        brat.updateJoint();
         drive.setPoseEstimate(START_POSE);
         drive.followTrajectorySequence(mainTrajectory);
     }
@@ -50,18 +48,30 @@ public class MUIE_PESTE_POD extends LinearOpMode {
         switch (result){
             case CENTER: {
                 mainTrajectoryBuilder
+                        .UNSTABLE_addTemporalMarkerOffset(0, () -> {
+                            brat.jointStatus = Brat.JointStatus.AUTO;
+                            brat.updateJoint();
+                        })
                         .UNSTABLE_addTemporalMarkerOffset(1.8, () -> cleste.openGripper())
                         .lineToLinearHeading(new Pose2d(26, 0, Math.toRadians(0)));
                 return  mainTrajectoryBuilder.build();
             }
             case LEFT: {
                 mainTrajectoryBuilder
+                        .UNSTABLE_addTemporalMarkerOffset(0, () -> {
+                            brat.jointStatus = Brat.JointStatus.AUTO;
+                            brat.updateJoint();
+                        })
                         .UNSTABLE_addTemporalMarkerOffset(1.8, () -> cleste.openGripper())
                         .lineToLinearHeading(new Pose2d(15, -3, Math.toRadians(45)));
                 return mainTrajectoryBuilder.build();
             }
             case RIGHT: {
                 mainTrajectoryBuilder
+                        .UNSTABLE_addTemporalMarkerOffset(0, () -> {
+                            brat.jointStatus = Brat.JointStatus.AUTO;
+                            brat.updateJoint();
+                        })
                         .UNSTABLE_addTemporalMarkerOffset(1.8, () -> cleste.openGripper())
                         .lineToLinearHeading(new Pose2d(18, -13, Math.toRadians(270)));
                 return mainTrajectoryBuilder.build();
