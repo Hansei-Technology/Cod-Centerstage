@@ -7,17 +7,10 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.hardware.BratCleste;
-import org.firstinspires.ftc.teamcode.hardware.GlisiereOrizontale;
-
 @TeleOp(group = "Tests")
 @Config
 public class TestConfigServo2 extends LinearOpMode
 {
-
-    public BratCleste bratCleste;
-    public GlisiereOrizontale glisOriz;
-
     public Servo servo;
     public Servo servo2;
     public static String nServo = "s1";

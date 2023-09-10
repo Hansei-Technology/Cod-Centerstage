@@ -12,6 +12,17 @@ public class ctsStartDetection extends OpenCvPipeline {
 
     Telemetry telemetry;
 
+    public enum PixelPos {
+        LEFT,
+        CENTER,
+        RIGHT,
+        NONE
+    }
+
+    public PixelPos detectedPos;
+
+    public PixelPos getDetectedPos() {return detectedPos;}
+
     public ctsStartDetection(Telemetry telemetry) {
         this.telemetry = telemetry;
     }
@@ -20,13 +31,16 @@ public class ctsStartDetection extends OpenCvPipeline {
 
 
     // // dimensions in percents
-    public Integer topCutoffSides = 80;
-    public Integer bottomCutoffSides = 35;
-    public Integer topCutoffCenter = 67;
-    public Integer bottomCutoffCenter = 65;
+    //320x240 upside down
+
+    // // dimensions in percents
+    public Integer topCutoffSides = 92;
+    public Integer bottomCutoffSides = 95;
+    public Integer topCutoffCenter = 92;
+    public Integer bottomCutoffCenter = 100;
     public Integer sideCutoff = 0;
-    public Integer centerWidth = 65;
-    public Integer centerCutoff = 252;
+    public Integer centerWidth = 140;
+    public Integer centerCutoff = 255;
 
     // red and blue beacon HSV limits
     public Scalar lowerRed = new Scalar(0, 136, 0);
@@ -51,7 +65,7 @@ public class ctsStartDetection extends OpenCvPipeline {
         ) {
             isBlue = true;
         }
-        return isRed || isBlue || false;
+        return isRed || isBlue;
     }
 
     @Override
@@ -82,52 +96,47 @@ public class ctsStartDetection extends OpenCvPipeline {
         int centerSum = 0;
 
 
-        // white triangle on the left of the main axis, starting from the bottom center
-        for (int i = 0; i < inputMat.rows(); i++) {
-            for (int j = 0; j < inputMat.cols(); j++) {
+        for (int i = height / 2 - 50; i < height / 2 + 50; i += 3) {
+            for (int j = 0; j < width; j += 3) {
                 // pixel color hsv as double[3]
                 double pixel[] = hsvMat.get(i, j);
-                if ((j < width/2 - (height -i) * Math.tan(Math.toRadians(angle)))
-                        && (i > topCutoffSides ) && (i < height - bottomCutoffSides)
-                        && (j < width/2 - centerCutoff/2) && (j > sideCutoff)
-                        && isRedOrBlue(pixel)
+                if ((j < width / 2 - (height - i) * Math.tan(Math.toRadians(angle)))
+                        && (i > topCutoffSides) && (i < height - bottomCutoffSides)
+                        && (j < width / 2 - centerCutoff / 2) && (j > sideCutoff)
+
                 ) {
-                    leftSum++;
                     mask.put(i, j, 0, 0, 255);
+                    if (isRedOrBlue(pixel)) {
+                        leftSum++;
+                        mask.put(i, j, 255, 255, 255);
+
+                    }
                 }
                 leftCount++;
-            }
-        }
 
-        // white triangle on the right of the main axis, starting from the bottom center
-        for (int i = 0; i < inputMat.rows(); i++) {
-            for (int j = 0; j < inputMat.cols(); j++) {
-                // pixel color hsv as double[3]
-                double pixel[] = hsvMat.get(i, j);
-                if ((j > width/2 + (height -i) * Math.tan(Math.toRadians(angle)))
-                        && (i > topCutoffSides ) && (i < height - bottomCutoffSides)
-                        && (j > width/2 + centerCutoff/2) && (j < width - sideCutoff)
-                        && isRedOrBlue(pixel)
+                if ((j > width / 2 + (height - i) * Math.tan(Math.toRadians(angle)))
+                        && (i > topCutoffSides) && (i < height - bottomCutoffSides)
+                        && (j > width / 2 + centerCutoff / 2) && (j < width - sideCutoff)
+
                 ) {
-                    rightSum++;
                     mask.put(i, j, 0, 255, 0);
+                    if (isRedOrBlue(pixel)) {
+                        rightSum++;
+                        mask.put(i, j, 255, 255, 255);
+
+                    }
                 }
                 rightCount++;
-            }
-        }
 
-        for (int i = 0; i < inputMat.rows(); i++) {
-            for (int j = 0; j < inputMat.cols(); j++) {
-                // pixel color hsv as double[3]
-                double pixel[] = hsvMat.get(i, j);
-                if ((j < width/2 + (height -i) * Math.tan(Math.toRadians(angle)))
-                        && (j > width/2 - (height -i) * Math.tan(Math.toRadians(angle)))
-                        && (i > topCutoffCenter ) && (i < height - bottomCutoffCenter)
-                        && (j > width/2 - centerWidth/2) && (j < width/2 + centerWidth/2)
-                        && isRedOrBlue(pixel)
-                ) {
-                    centerSum++;
+                if ((j < width / 2 + (height - i) * Math.tan(Math.toRadians(angle)))
+                        && (j > width / 2 - (height - i) * Math.tan(Math.toRadians(angle)))
+                        && (i > topCutoffCenter) && (i < height - bottomCutoffCenter)
+                        && (j > width / 2 - centerWidth / 2) && (j < width / 2 + centerWidth / 2)) {
                     mask.put(i, j, 255, 0, 0);
+                    if (isRedOrBlue(pixel)) {
+                        centerSum++;
+                        mask.put(i, j, 255, 255, 255);
+                    }
                 }
                 centerCount++;
             }
@@ -140,16 +149,17 @@ public class ctsStartDetection extends OpenCvPipeline {
 
         // choose with highest density
         if (leftDensity > rightDensity && leftDensity > centerDensity) {
-            telemetry.addData("side", "left");
+            detectedPos = PixelPos.LEFT;
         } else if (rightDensity > leftDensity && rightDensity > centerDensity) {
-            telemetry.addData("side", "right");
+            detectedPos = PixelPos.RIGHT;
         } else if (centerDensity > leftDensity && centerDensity > rightDensity) {
-            telemetry.addData("side", "center");
+            detectedPos = PixelPos.CENTER;
         } else {
-            telemetry.addData("side", "none");
+            detectedPos = PixelPos.NONE;
         }
 
         // push to telemetry
+        telemetry.addData("side: ", detectedPos);
         // telemetry.addData("leftDensity", leftDensity);
         // telemetry.addData("leftSum", leftSum);
         // telemetry.addData("leftCount", leftCount);

@@ -10,30 +10,40 @@ import com.qualcomm.robotcore.hardware.Servo;
 //@Disabled
 @TeleOp(group = "Tests")
 @Config
-public class TestConfigMotor extends LinearOpMode
+public class TestConfigMotorServo extends LinearOpMode
 {
 
     public DcMotorEx motor;
     public static String nMotor = "1";
     public static double power = 0;
 
+    public Servo servo;
+    public static String nServo = "1";
+    public static double pozServo = 0;
+
     @Override
     public void runOpMode(){
 
         motor = this.hardwareMap.get(DcMotorEx.class, nMotor);
+        //motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        if(nServo != "1")
+        {
+            servo = this.hardwareMap.get(Servo.class, nServo);
+        }
 
         waitForStart();
 
         while (opModeIsActive()){
 
-            motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            motor.setPower(power);
+                motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                motor.setPower(power);
 
+                if(nServo != "1")
+                    servo.setPosition(pozServo);
 
-            telemetry.addData("poz ", motor.getCurrentPosition());
-            telemetry.update();
+                telemetry.addData("poz ", motor.getCurrentPosition());
+                telemetry.update();
         }
 
     }

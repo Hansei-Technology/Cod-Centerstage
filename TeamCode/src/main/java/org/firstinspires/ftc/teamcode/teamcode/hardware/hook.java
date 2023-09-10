@@ -1,2 +1,4 @@
-package org.firstinspires.ftc.teamcode.teamcode.hardware;public class hook {
+package org.firstinspires.ftc.teamcode.teamcode.hardware;
+
+public class hook {
 }
