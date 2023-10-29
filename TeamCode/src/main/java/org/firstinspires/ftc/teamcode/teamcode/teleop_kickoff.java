@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.teamcode;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.qualcomm.hardware.bosch.BHI260IMU;
+import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -16,6 +18,7 @@ import org.firstinspires.ftc.teamcode.teamcode.hardware.Cleste;
 import org.firstinspires.ftc.teamcode.teamcode.hardware.Flipper;
 import org.firstinspires.ftc.teamcode.teamcode.hardware.StickyGamepad;
 import org.firstinspires.ftc.teamcode.teamcode.hardware.lift;
+import org.opencv.core.Mat;
 
 import java.util.List;
 
@@ -30,6 +33,8 @@ public class teleop_kickoff extends LinearOpMode {
     Cleste cleste;
     public DcMotorEx huuuuuStanga, huuuuuDreapta;
 
+    public double speed;
+
     public void move(Gamepad g)
     {
         double rotRight = 0, rotLeft = 0;
@@ -38,19 +43,55 @@ public class teleop_kickoff extends LinearOpMode {
         } else {
             rotLeft = 0 - g.right_stick_x;
         }
+
+        if(Math.abs(g.left_stick_x) < 0.14)
+            g.left_stick_x = 0;
+        if(Math.abs(g.left_stick_y) < 0.14)
+            g.left_stick_y = 0;
+
         rightFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rightRear.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         leftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         leftRear.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        rightRear.setPower(-g.left_stick_y + g.left_stick_x - rotRight + rotLeft);
-        rightFront.setPower(-g.left_stick_y - g.left_stick_x - rotRight + rotLeft);
-        leftFront.setPower(-g.left_stick_y + g.left_stick_x + rotRight - rotLeft);
-        leftRear.setPower(-g.left_stick_y - g.left_stick_x + rotRight - rotLeft);
+        rightRear.setPower((-g.left_stick_y + g.left_stick_x - rotRight + rotLeft) * speed);
+        rightFront.setPower((-g.left_stick_y - g.left_stick_x - rotRight + rotLeft) * speed);
+        leftFront.setPower((-g.left_stick_y + g.left_stick_x + rotRight - rotLeft) * speed);
+        leftRear.setPower((-g.left_stick_y - g.left_stick_x + rotRight - rotLeft) * speed);
+    }
+
+    public void FieldCentricDrive(Gamepad g, double power, double angle) {
+
+        double y = -g.left_stick_y;
+        double x = g.left_stick_x;
+        double rx = g.right_stick_x;
+        double rotX = x * Math.cos(-angle) - y * Math.sin(-angle);
+        double rotY = x * Math.sin(-angle) - y * Math.cos(-angle);
+
+        double denom = Math.max(Math.abs(rotX) + Math.abs(rotY) + Math.abs(rx), 1);
+
+        double lf, lr, rf, rr, maxS;
+        rf = (rotY - rotX - rx) / denom;
+        lf = (rotY + rotX + rx) / denom;
+        rr = (rotY + rotX - rx) / denom;
+        lr = (rotY - rotX + rx) / denom;
+
+        rightFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightRear.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        leftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        leftRear.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        rightFront.setPower(rf * power);
+        leftFront.setPower(lf * power);
+        rightRear.setPower(rr * power);
+        leftRear.setPower(lr * power);
     }
 
     @Override
     public void runOpMode() throws InterruptedException {
+
+        speed = 0.5;
+
         leftFront = hardwareMap.get(DcMotorEx.class, "leftFront");
         leftRear = hardwareMap.get(DcMotorEx.class, "leftRear");
         rightRear = hardwareMap.get(DcMotorEx.class, "rightRear");
@@ -72,6 +113,7 @@ public class teleop_kickoff extends LinearOpMode {
         for (LynxModule hub : allHubs) {
             hub.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
         }
+
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         stickyGamepad1 = new StickyGamepad(gamepad1, this);
         stickyGamepad2 = new StickyGamepad(gamepad2, this);
@@ -84,9 +126,11 @@ public class teleop_kickoff extends LinearOpMode {
         waitForStart();
         brat.moveToGame();
         while(opModeIsActive() && !isStopRequested()) {
-
             drive.update();
             move(gamepad1);
+            //FieldCentricDrive(gamepad1, 0.5, drive.getExternalHeading());
+
+
 //            if(gamepad1.left_trigger != 0)
 //            {
 //                brat.CurrentState = Brat.state.bratGoingDown;
@@ -101,16 +145,19 @@ public class teleop_kickoff extends LinearOpMode {
             } else if(gamepad1.dpad_up)
             {
                 brat.CurrentState = Brat.state.jointGoingUp;
+            } else
+            {
+                brat.CurrentState = Brat.state.noUpdate;
             }
 
             if(gamepad1.touchpad)
             {
                 huuuuuDreapta.setPower(1);
-                huuuuuStanga.setPower(1);
+//                huuuuuStanga.setPower(1);
             } else
             {
                 huuuuuDreapta.setPower(0);
-                huuuuuStanga.setPower(0);
+//                huuuuuStanga.setPower(0);
             }
 
             if(gamepad1.a)
@@ -142,6 +189,7 @@ public class teleop_kickoff extends LinearOpMode {
             brat.update();
             telemetry.addData("pozBrat", brat.motor.getCurrentPosition());
             telemetry.addData("brat ", brat.CurrentState);
+            telemetry.addData("heading ", drive.getExternalHeading());
             telemetry.addData("cleste ", cleste.status);
             telemetry.addData("joint ", brat.jointStatus);
             telemetry.update();

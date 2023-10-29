@@ -47,7 +47,7 @@ public class Cleste
 //            PreviousState = CurrentState;
 //        }
 //    }
-    public static double CLOSE_POS = 0.7;
+    public static double CLOSE_POS = 0.8;
     public static double OPEN_POS = 0.5;
 
     public GripperStatus status = GripperStatus.CLOSE;

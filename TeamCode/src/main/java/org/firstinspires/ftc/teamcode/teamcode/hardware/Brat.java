@@ -34,7 +34,7 @@ public class Brat {
     double powJos = -0.1;
 
     public PosBrat posStorage = new PosBrat(120, 0.525);
-    public PosBrat posBoard = new PosBrat(80, 0.47);
+    public PosBrat posBoard = new PosBrat(120, 0.47);
     public PosBrat posGround = new PosBrat(0, 0.5);
     public PosBrat posGround2 = new PosBrat(15, 0.5);
     public PosBrat posJointIdle = new PosBrat(0, 0.48);
@@ -60,6 +60,7 @@ public class Brat {
         goToGround,
         goToBoard,
         gotoGrab,
+        noUpdate,
         init
     }
 
