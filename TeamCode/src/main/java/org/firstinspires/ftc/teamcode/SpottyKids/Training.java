@@ -2,16 +2,6 @@ package org.firstinspires.ftc.teamcode.SpottyKids;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
-
-import org.firstinspires.ftc.teamcode.teamcode.hardware.StickyGamepad;
-import org.firstinspires.ftc.teamcode.teamcode.hardware.intake;
-
-import java.util.Optional;
 
 @TeleOp
 public class Training extends LinearOpMode {

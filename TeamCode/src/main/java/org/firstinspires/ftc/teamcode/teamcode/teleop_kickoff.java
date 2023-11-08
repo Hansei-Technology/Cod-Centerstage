@@ -2,8 +2,6 @@ package org.firstinspires.ftc.teamcode.teamcode;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.qualcomm.hardware.bosch.BHI260IMU;
-import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -15,10 +13,7 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import org.firstinspires.ftc.teamcode.roadrunner.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.teamcode.hardware.Brat;
 import org.firstinspires.ftc.teamcode.teamcode.hardware.Cleste;
-import org.firstinspires.ftc.teamcode.teamcode.hardware.Flipper;
 import org.firstinspires.ftc.teamcode.teamcode.hardware.StickyGamepad;
-import org.firstinspires.ftc.teamcode.teamcode.hardware.lift;
-import org.opencv.core.Mat;
 
 import java.util.List;
 
