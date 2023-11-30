@@ -16,12 +16,12 @@ import java.util.ArrayList;
 @Config
 public class ArmController {
     public DcMotorEx motor;
-    int MOVING_POS = 400;
-    int DOWN_POS = 30;
+    public int MOVING_POS = 400;
+    public int DOWN_POS = 30;
 
     public int HANG = 1900;
 
-    int rowPosition[] = { //TODO:SET THIS VALUES
+    public int rowPosition[] = { //TODO:SET THIS VALUES
             4700-1500, //base
             4700-1500, //row1
             4650-1500, //row2
@@ -79,6 +79,13 @@ public class ArmController {
                     pidController.targetValue = rowPosition[robot.currentRow];
         }
 
+        double powerLift = pidController.update(currentPosition);
+        //powerLift = Math.max(-1, Math.min(powerLift * 14 / robot.voltage, 1));
+        motor.setPower(powerLift);
+    }
+
+    public void goToPos(double pos) {
+        pidController.targetValue = pos;
         double powerLift = pidController.update(currentPosition);
         //powerLift = Math.max(-1, Math.min(powerLift * 14 / robot.voltage, 1));
         motor.setPower(powerLift);

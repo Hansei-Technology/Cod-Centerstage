@@ -16,6 +16,7 @@ import org.firstinspires.ftc.teamcode.teamcode.controllers.ArmController;
 import org.firstinspires.ftc.teamcode.teamcode.controllers.ClawController;
 import org.firstinspires.ftc.teamcode.teamcode.controllers.ExtensionController;
 import org.firstinspires.ftc.teamcode.teamcode.controllers.JointController;
+import org.firstinspires.ftc.teamcode.teamcode.controllers.UniversalStates;
 
 @Autonomous
 public class RedRightOff extends LinearOpMode {
@@ -26,12 +27,14 @@ public class RedRightOff extends LinearOpMode {
     public ArmController armController;
     public ExtensionController extensionController;
     public JointController jointController;
+    public UniversalStates robot;
 
 
     @Override
     public void runOpMode() throws InterruptedException {
         drive = new SampleMecanumDrive(hardwareMap);
-        armController = new ArmController(hardwareMap, )
+        robot = new UniversalStates();
+        armController = new ArmController(hardwareMap, robot);
         if(isStopRequested()) return;
         drive.setPoseEstimate(START_POSE);
 
@@ -40,7 +43,12 @@ public class RedRightOff extends LinearOpMode {
     public TrajectorySequence buildMainTraj(){
         TrajectorySequenceBuilder trajectorySequenceBuilder = new TrajectorySequenceBuilder(START_POSE);
         trajectorySequenceBuilder.lineToConstantHeading(new Vector2d(10, 10))
-                .addTemporalMarker(() -> )
+                .UNSTABLE_addTemporalMarkerOffset(1, () -> {
+                    robot.state = UniversalStates.State.ARM_UP;
+                    clawController.statusRight = ClawController.GripperStatus.CLOSED;
+                    clawController.update();
+                    armController.update();
+                });
         return trajectorySequenceBuilder.build();
     }
 
