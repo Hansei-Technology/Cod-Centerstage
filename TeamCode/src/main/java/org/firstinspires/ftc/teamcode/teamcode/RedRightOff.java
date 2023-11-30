@@ -41,7 +41,7 @@ public class RedRightOff extends LinearOpMode {
     }
 
     public TrajectorySequence buildMainTraj(){
-        TrajectorySequenceBuilder trajectorySequenceBuilder = new TrajectorySequenceBuilder(START_POSE);
+        TrajectorySequenceBuilder trajectorySequenceBuilder = drive.trajectorySequenceBuilder(START_POSE);
         trajectorySequenceBuilder.lineToConstantHeading(new Vector2d(10, 10))
                 .UNSTABLE_addTemporalMarkerOffset(1, () -> {
                     robot.state = UniversalStates.State.ARM_UP;
