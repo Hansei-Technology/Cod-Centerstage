@@ -62,9 +62,12 @@ public class TELEOP extends LinearOpMode {
 
             if(stickyG2.left_bumper) //leftClaw
             {
-                if(claw.statusLeft == ClawController.GripperStatus.CLOSED)
+                if(claw.statusLeft == ClawController.GripperStatus.CLOSED) {
                     claw.statusLeft = ClawController.GripperStatus.OPEN;
-                else
+                    if(robot.state==UniversalStates.State.ARM_UP) {
+                        robot.state= UniversalStates.State.MOVING;
+                    }
+                }else
                     claw.statusLeft = ClawController.GripperStatus.CLOSED;
             }
             if(stickyG2.right_bumper) //rightClaw

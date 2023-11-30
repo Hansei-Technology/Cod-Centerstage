@@ -19,21 +19,21 @@ public class ArmController {
     int MOVING_POS = 400;
     int DOWN_POS = 30;
 
-    public int HANG = 2000;
+    public int HANG = 1900;
 
     int rowPosition[] = { //TODO:SET THIS VALUES
-            4700, //base
-            4700, //row1
-            4650, //row2
-            4600, //row3
-            4550, //row4
-            4500, //row5
-            4450, //row6
-            4400, //row7
-            4350, //row8
-            4300, //row9
-            4250, //row10
-            4200, //row11
+            4700-1500, //base
+            4700-1500, //row1
+            4650-1500, //row2
+            4600-1500, //row3
+            4550-1500, //row4
+            4500-1500, //row5
+            4450-1500, //row6
+            4400-1500, //row7
+            4350-1500, //row8
+            4300-1500, //row9
+            4250-1500, //row10
+            4200-1500, //row11
     };
 
     public static double kp = 0.025, kd = 0.03, ki = 0.01;

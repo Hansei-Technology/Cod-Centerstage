@@ -15,5 +15,5 @@ public class UniversalStates {
         READY_TO_HANG
     }
 
-    public State state = State.ARM_UP, previousState = State.ARM_UP;
+    public State state = State.MOVING, previousState = State.MOVING;
 }
