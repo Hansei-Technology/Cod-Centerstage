@@ -18,6 +18,7 @@ public class ArmController {
     public DcMotorEx motor;
     public int MOVING_POS = 400;
     public int DOWN_POS = 30;
+    public int AUTO_POS = 3200;
 
     public int HANG = 1900;
 
@@ -75,6 +76,9 @@ public class ArmController {
                 case MOVING:
                     pidController.targetValue = MOVING_POS;
                     break;
+            case AUTO:
+                pidController.targetValue=AUTO_POS;
+                break;
                 case ARM_UP:
                     pidController.targetValue = rowPosition[robot.currentRow];
         }

@@ -12,6 +12,8 @@ public class UniversalStates {
         ARM_DOWN,
         ARM_UP,
         MOVING,
+
+        AUTO,
         READY_TO_HANG
     }
 

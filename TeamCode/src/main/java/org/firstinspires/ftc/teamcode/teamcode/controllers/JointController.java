@@ -8,6 +8,8 @@ public class JointController {
 
     double POS0 = 0.67;
 
+    double AUTO_POS=0.67;
+
     public int targetRow = -1, lastRow = -1;
 
     UniversalStates robot;
@@ -37,7 +39,11 @@ public class JointController {
 
     public void update() {
         targetRow = robot.currentRow;
-        if(robot.state == UniversalStates.State.ARM_DOWN) {
+        if(robot.state== UniversalStates.State.AUTO){
+            servoLeft.setPosition(AUTO_POS);
+            servoRight.setPosition(AUTO_POS);
+        }
+        else if(robot.state == UniversalStates.State.ARM_DOWN) {
             servoLeft.setPosition(POS0 + robot.extensionPos * angleCoeff);
             servoRight.setPosition(POS0 + robot.extensionPos * angleCoeff);
         } else if(targetRow != lastRow) {
