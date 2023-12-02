@@ -2,10 +2,13 @@ package org.firstinspires.ftc.teamcode.teamcode.opencv;
 
 import org.opencv.core.Mat;
 import org.opencv.core.Core;
+import org.opencv.core.CvType;
 import org.opencv.core.Scalar;
+import org.opencv.core.Point;
+import org.opencv.core.Rect;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.openftc.easyopencv.OpenCvPipeline;
-
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class ctsStartDetection extends OpenCvPipeline {
@@ -21,161 +24,127 @@ public class ctsStartDetection extends OpenCvPipeline {
 
     public PixelPos detectedPos;
 
-    public PixelPos getDetectedPos() {return detectedPos;}
+    public PixelPos getDetectedPos() {
+        return detectedPos;
+    }
 
     public ctsStartDetection(Telemetry telemetry) {
         this.telemetry = telemetry;
+        leftTop = new Point(0, 167);
+        leftBottom = new Point(38, 205);
+        centerTop = new Point(99, 177);
+        centerBottom = new Point(161, 212);
+        rightTop = new Point(198, 218);
+        rightBottom = new Point(255, 182);
     }
 
-    public Integer angle = 40;
+    // Regions defined by two corner points
+    public Point leftTop, leftBottom, centerTop, centerBottom, rightTop, rightBottom;
 
-
-    // // dimensions in percents
-    //320x240 upside down
-
-    // // dimensions in percents
-    public Integer topCutoffSides = 92;
-    public Integer bottomCutoffSides = 95;
-    public Integer topCutoffCenter = 92;
-    public Integer bottomCutoffCenter = 100;
-    public Integer sideCutoff = 0;
-    public Integer centerWidth = 140;
-    public Integer centerCutoff = 255;
-
-    // red and blue beacon HSV limits
+    // HSV color bounds for red and blue
     public Scalar lowerRed = new Scalar(0, 136, 0);
     public Scalar upperRed = new Scalar(11, 255, 255);
     public Scalar lowerBlue = new Scalar(104, 100, 83);
     public Scalar upperBlue = new Scalar(114, 255, 255);
 
-    // function to filter pixel to see if its red or blue. returns true if red or blue, false otherwise
-    // takes double array of size 3 as input
-    public boolean isRedOrBlue(double[] pixel) {
-        boolean isRed = false;
-        boolean isBlue = false;
-        if ((pixel[0] >= lowerRed.val[0]) && (pixel[0] <= upperRed.val[0])
-                && (pixel[1] >= lowerRed.val[1]) && (pixel[1] <= upperRed.val[1])
-                && (pixel[2] >= lowerRed.val[2]) && (pixel[2] <= upperRed.val[2])
-        ) {
-            isRed = true;
-        }
-        if ((pixel[0] >= lowerBlue.val[0]) && (pixel[0] <= upperBlue.val[0])
-                && (pixel[1] >= lowerBlue.val[1]) && (pixel[1] <= upperBlue.val[1])
-                && (pixel[2] >= lowerBlue.val[2]) && (pixel[2] <= upperBlue.val[2])
-        ) {
-            isBlue = true;
-        }
+    // Helper method to check if pixel is red or blue
+    private boolean isRedOrBlue(double[] pixel) {
+        Mat pixelMat = new Mat(1, 1, CvType.CV_8UC3);
+        pixelMat.put(0, 0, pixel);
+
+        Mat redMask = new Mat();
+        Core.inRange(pixelMat, lowerRed, upperRed, redMask);
+        boolean isRed = Core.countNonZero(redMask) > 0;
+
+        Mat blueMask = new Mat();
+        Core.inRange(pixelMat, lowerBlue, upperBlue, blueMask);
+        boolean isBlue = Core.countNonZero(blueMask) > 0;
+
+        pixelMat.release();
+        redMask.release();
+        blueMask.release();
+
         return isRed || isBlue;
     }
 
     @Override
     public Mat processFrame(Mat inputMat) {
-
-
-        // screen dimensions
         int width = inputMat.cols();
         int height = inputMat.rows();
 
-        //convert from rgba to rgb
         Imgproc.cvtColor(inputMat, inputMat, Imgproc.COLOR_RGBA2RGB);
+        Imgproc.GaussianBlur(inputMat, inputMat, new Size(5, 5), 0);
 
-        // blur image
-        Imgproc.GaussianBlur(inputMat, inputMat, new org.opencv.core.Size(5, 5), 0);
-
-        Mat mask = new Mat(inputMat.rows(), inputMat.cols(), inputMat.type());
-
-        // hsv
+        // Convert to HSV
         Mat hsvMat = new Mat();
         Imgproc.cvtColor(inputMat, hsvMat, Imgproc.COLOR_RGB2HSV);
 
-        int leftCount = 0;
-        int leftSum = 0;
-        int rightCount = 0;
-        int rightSum = 0;
-        int centerCount = 0;
-        int centerSum = 0;
+        // Define regions as rectangles
+        Rect leftRegion = new Rect(mapPoint(leftTop, width, height), mapPoint(leftBottom, width, height));
+        Rect centerRegion = new Rect(mapPoint(centerTop, width, height), mapPoint(centerBottom, width, height));
+        Rect rightRegion = new Rect(mapPoint(rightTop, width, height), mapPoint(rightBottom, width, height));
 
+        // Initialize counters
+        int[] sum = new int[3];
+        int[] count = new int[3];
 
-        for (int i = height / 2 - 50; i < height / 2 + 50; i += 3) {
-            for (int j = 0; j < width; j += 3) {
-                // pixel color hsv as double[3]
-                double pixel[] = hsvMat.get(i, j);
-                if ((j < width / 2 - (height - i) * Math.tan(Math.toRadians(angle)))
-                        && (i > topCutoffSides) && (i < height - bottomCutoffSides)
-                        && (j < width / 2 - centerCutoff / 2) && (j > sideCutoff)
+        // Process each region
+        processRegion(hsvMat, leftRegion, sum, count, 0);
+        processRegion(hsvMat, centerRegion, sum, count, 1);
+        processRegion(hsvMat, rightRegion, sum, count, 2);
 
-                ) {
-                    mask.put(i, j, 0, 0, 255);
-                    if (isRedOrBlue(pixel)) {
-                        leftSum++;
-                        mask.put(i, j, 255, 255, 255);
+        // Determine highest density
+        detectedPos = determinePosition(sum, count);
 
-                    }
-                }
-                leftCount++;
-
-                if ((j > width / 2 + (height - i) * Math.tan(Math.toRadians(angle)))
-                        && (i > topCutoffSides) && (i < height - bottomCutoffSides)
-                        && (j > width / 2 + centerCutoff / 2) && (j < width - sideCutoff)
-
-                ) {
-                    mask.put(i, j, 0, 255, 0);
-                    if (isRedOrBlue(pixel)) {
-                        rightSum++;
-                        mask.put(i, j, 255, 255, 255);
-
-                    }
-                }
-                rightCount++;
-
-                if ((j < width / 2 + (height - i) * Math.tan(Math.toRadians(angle)))
-                        && (j > width / 2 - (height - i) * Math.tan(Math.toRadians(angle)))
-                        && (i > topCutoffCenter) && (i < height - bottomCutoffCenter)
-                        && (j > width / 2 - centerWidth / 2) && (j < width / 2 + centerWidth / 2)) {
-                    mask.put(i, j, 255, 0, 0);
-                    if (isRedOrBlue(pixel)) {
-                        centerSum++;
-                        mask.put(i, j, 255, 255, 255);
-                    }
-                }
-                centerCount++;
-            }
-        }
-
-        // density
-        int leftDensity = (int)((double) leftSum / (double) leftCount *1000);
-        int rightDensity = (int)((double) rightSum / (double) rightCount *1000);
-        int centerDensity = (int)((double) centerSum / (double) centerCount *1000);
-
-        // choose with highest density
-        if (leftDensity > rightDensity && leftDensity > centerDensity) {
-            detectedPos = PixelPos.LEFT;
-        } else if (rightDensity > leftDensity && rightDensity > centerDensity) {
-            detectedPos = PixelPos.RIGHT;
-        } else if (centerDensity > leftDensity && centerDensity > rightDensity) {
-            detectedPos = PixelPos.CENTER;
-        } else {
-            detectedPos = PixelPos.NONE;
-        }
-
-        // push to telemetry
-        telemetry.addData("side: ", detectedPos);
-        // telemetry.addData("leftDensity", leftDensity);
-        // telemetry.addData("leftSum", leftSum);
-        // telemetry.addData("leftCount", leftCount);
-        // telemetry.addData("-rightDensity", rightDensity);
-        // telemetry.addData("-rightSum", rightSum);
-        // telemetry.addData("-rightCount", rightCount);
-        // telemetry.addData("--centerDensity", centerDensity);
-        // telemetry.addData("--centerSum", centerSum);
-        // telemetry.addData("--centerCount", centerCount);
+        // Draw regions and update telemetry
+        drawRegions(inputMat, leftRegion, rightRegion, centerRegion, sum);
+        telemetry.addData("Detected Position: ", detectedPos);
         telemetry.update();
 
-        // apply mask to inputMat
-        Core.bitwise_and(inputMat, mask, inputMat);
-
-        return mask;
+        return inputMat;
     }
 
-}
+    // Helper method to map 0-255 range points to screen coordinates
+    private Point mapPoint(Point p, int width, int height) {
+        return new Point(p.x / 255 * width, p.y / 255 * height);
+    }
 
+    // Helper method to process each region
+    private void processRegion(Mat hsvMat, Rect region, int[] sum, int[] count, int index) {
+        byte[] maskData = new byte[3];
+        for (int i = region.y; i < region.y + region.height; i += 3) { // Skip every 3 rows
+            for (int j = region.x; j < region.x + region.width; j += 3) { // Skip every 3 columns
+                hsvMat.get(i, j, maskData);
+                if (isRedOrBlue(new double[]{maskData[0] & 0xFF, maskData[1] & 0xFF, maskData[2] & 0xFF})) {
+                    sum[index]++;
+                }
+                count[index]++;
+            }
+        }
+    }
+
+    // Helper method to determine the position with the highest density
+    private PixelPos determinePosition(int[] sum, int[] count) {
+        int maxDensityIndex = 0;
+        double maxDensity = 0;
+        for (int i = 0; i < 3; i++) {
+            double density = (double) sum[i] / count[i];
+            if (density > maxDensity) {
+                maxDensity = density;
+                maxDensityIndex = i;
+            }
+        }
+        return PixelPos.values()[maxDensityIndex];
+    }
+
+    // Helper method to draw regions
+    private void drawRegions(Mat img, Rect left, Rect right, Rect center, int[] sum) {
+        Scalar red = new Scalar(255, 0, 0);
+        Scalar blue = new Scalar(0, 0, 255);
+        Scalar white = new Scalar(255, 255, 255);
+
+        Imgproc.rectangle(img, left, sum[0] > 0 ? red : white);
+        Imgproc.rectangle(img, right, sum[2] > 0 ? blue : white);
+        Imgproc.rectangle(img, center, white);
+    }
+}

@@ -17,6 +17,7 @@ import com.acmerobotics.roadrunner.trajectory.constraints.MinVelocityConstraint;
 import com.acmerobotics.roadrunner.trajectory.constraints.ProfileAccelerationConstraint;
 import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryAccelerationConstraint;
 import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryVelocityConstraint;
+import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -24,11 +25,14 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.ImuOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.roadrunner.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.roadrunner.trajectorysequence.TrajectorySequenceBuilder;
 import org.firstinspires.ftc.teamcode.roadrunner.trajectorysequence.TrajectorySequenceRunner;
@@ -38,6 +42,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.XYZ;
 import static org.firstinspires.ftc.teamcode.roadrunner.drive.DriveConstants.MAX_ACCEL;
 import static org.firstinspires.ftc.teamcode.roadrunner.drive.DriveConstants.MAX_ANG_ACCEL;
 import static org.firstinspires.ftc.teamcode.roadrunner.drive.DriveConstants.MAX_ANG_VEL;
@@ -55,11 +60,10 @@ import static org.firstinspires.ftc.teamcode.roadrunner.drive.DriveConstants.kV;
  */
 @Config
 public class SampleMecanumDrive extends MecanumDrive {
-    public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(12, 0, 0);
-    public static PIDCoefficients HEADING_PID = new PIDCoefficients(13, 0, 0);
+    public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(12, 0, 1);
+    public static PIDCoefficients HEADING_PID = new PIDCoefficients(13, 0, 1);
 
-    public static double LATERAL_MULTIPLIER = 1.95;
-
+    public static double LATERAL_MULTIPLIER = 1;//TODO
     public static double VX_WEIGHT = 1;
     public static double VY_WEIGHT = 1;
     public static double OMEGA_WEIGHT = 1;
@@ -84,7 +88,7 @@ public class SampleMecanumDrive extends MecanumDrive {
         super(kV, kA, kStatic, TRACK_WIDTH, TRACK_WIDTH, LATERAL_MULTIPLIER);
 
         follower = new HolonomicPIDVAFollower(TRANSLATIONAL_PID, TRANSLATIONAL_PID, HEADING_PID,
-                new Pose2d(0.5, 0.5, Math.toRadians(5.0)), 0.5);
+                new Pose2d(0.1, 0.1, Math.toRadians(1.0)), 1);
 
         LynxModuleUtil.ensureMinimumFirmwareVersion(hardwareMap);
 
@@ -126,7 +130,15 @@ public class SampleMecanumDrive extends MecanumDrive {
         List<Integer> lastTrackingEncVels = new ArrayList<>();
 
         // TODO: if desired, use setLocalizer() to change the localization method
-        setLocalizer(new StandardTrackingWheelLocalizer(hardwareMap, lastTrackingEncPositions, lastTrackingEncVels));
+        imu = hardwareMap.get(IMU.class, "imu");
+        RevHubOrientationOnRobot.LogoFacingDirection logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.RIGHT;
+        RevHubOrientationOnRobot.UsbFacingDirection  usbDirection  = RevHubOrientationOnRobot.UsbFacingDirection.UP;
+
+        RevHubOrientationOnRobot orientationOnRobot = new RevHubOrientationOnRobot(logoDirection, usbDirection);
+        // Now initialize the IMU with this mounting orientation
+        // Note: if you choose two conflicting directions, this initialization will cause a code exception.
+        imu.initialize(new IMU.Parameters(orientationOnRobot));
+        setLocalizer(new TwoWheelLocalizer(hardwareMap, this));
 
         trajectorySequenceRunner = new TrajectorySequenceRunner(
                 follower, HEADING_PID, batteryVoltageSensor,
@@ -288,12 +300,14 @@ public class SampleMecanumDrive extends MecanumDrive {
 
     @Override
     public double getRawExternalHeading() {
-        return 0;
+        YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
+        return (double) orientation.getYaw(AngleUnit.RADIANS);
     }
 
     @Override
     public Double getExternalHeadingVelocity() {
-        return 0.0;
+
+        return (double) imu.getRobotAngularVelocity(AngleUnit.RADIANS).zRotationRate;
     }
 
     public static TrajectoryVelocityConstraint getVelocityConstraint(double maxVel, double maxAngularVel, double trackWidth) {

@@ -15,11 +15,12 @@ import java.util.ArrayList;
 public class ExtensionController {
     DcMotorEx motor;
 
+    public int POZ0 = 638;
     public int HANG = 0;
 
     int rowPosition[] = { //TODO:SET THIS VALUES
             0, //base
-            100, //row1
+            638, //row1
             200, //row2
             300, //row3
             400, //row4
@@ -78,5 +79,11 @@ public class ExtensionController {
         double powerLift = pidController.update(currentPosition);
         //powerLift = Math.max(-1, Math.min(powerLift * 14 / robot.voltage, 1));
         motor.setPower(powerLift);
+    }
+
+    public void goToPos(int pos) {
+        motor.setTargetPosition(pos);
+        motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        motor.setPower(0.6);
     }
 }

@@ -8,7 +8,8 @@ public class JointController {
 
     double POS0 = 0.67;
 
-    double AUTO_POS=0.67;
+    double BACKBOARD_POS = 0.7;
+    double AUTO_POS = 0.86;
 
     public int targetRow = -1, lastRow = -1;
 
@@ -18,7 +19,7 @@ public class JointController {
 
     double rowPosition[] = { //TODO:SET THIS VALUES
             0.67, //base
-            0.68, //row1
+            0.7, //row1
             0.68, //row2
             0.68, //row3
             0.67, //row4
@@ -39,6 +40,8 @@ public class JointController {
 
     public void update() {
         targetRow = robot.currentRow;
+        if(robot.state != UniversalStates.State.ARM_UP)
+            targetRow = 2;
         if(robot.state== UniversalStates.State.AUTO){
             servoLeft.setPosition(AUTO_POS);
             servoRight.setPosition(AUTO_POS);
@@ -51,5 +54,28 @@ public class JointController {
             servoLeft.setPosition(rowPosition[targetRow]);
         }
         lastRow = targetRow;
+    }
+
+    public void goToPos0()
+    {
+        servoRight.setPosition(POS0);
+        servoLeft.setPosition(POS0);
+    }
+
+    public void goToAuto()
+    {
+        servoRight.setPosition(AUTO_POS);
+        servoLeft.setPosition(AUTO_POS);
+    }
+
+    public void goToBackboard()
+    {
+        servoRight.setPosition(BACKBOARD_POS);
+        servoLeft.setPosition(BACKBOARD_POS);
+    }
+    public void endAuto()
+    {
+        servoRight.setPosition(0.6);
+        servoLeft.setPosition(0.6);
     }
 }

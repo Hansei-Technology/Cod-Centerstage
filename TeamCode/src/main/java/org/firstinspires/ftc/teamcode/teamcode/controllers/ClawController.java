@@ -17,8 +17,8 @@ public class ClawController {
     public static double RIGHT_CLOSE_POS = 0.49;
     public static double LEFT_OPEN_POS = 0.8;
 
-    public GripperStatus statusLeft = GripperStatus.CLOSED, statusRight = GripperStatus.CLOSED;
-    public GripperStatus previousStatusLeft = GripperStatus.CLOSED, previousStatusRight = GripperStatus.CLOSED;
+    public GripperStatus statusLeft = GripperStatus.OPEN, statusRight = GripperStatus.OPEN;
+    public GripperStatus previousStatusLeft = GripperStatus.OPEN, previousStatusRight = GripperStatus.OPEN;
 
     public enum GripperStatus {
         OPEN,

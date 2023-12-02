@@ -24,7 +24,7 @@ public class ArmController {
 
     public int rowPosition[] = { //TODO:SET THIS VALUES
             4700-1500, //base
-            4700-1500, //row1
+            3000, //row1
             4650-1500, //row2
             4600-1500, //row3
             4550-1500, //row4
@@ -37,7 +37,7 @@ public class ArmController {
             4200-1500, //row11
     };
 
-    public static double kp = 0.025, kd = 0.03, ki = 0.01;
+    public static double kp = 0.02, kd = 0.03, ki = 0.01;
     PIDController pidController = new PIDController(kp, kd, ki);
 
     public int currentPosition;
@@ -70,17 +70,26 @@ public class ArmController {
 
         currentPosition = motor.getCurrentPosition();
         switch (robot.state) {
-                case ARM_DOWN:
+                case ARM_DOWN: {
+                    pidController.maxOutput = 0.5;
                     pidController.targetValue = DOWN_POS;
                     break;
-                case MOVING:
+                }
+                case MOVING: {
+                    pidController.maxOutput = 1;
                     pidController.targetValue = MOVING_POS;
                     break;
-            case AUTO:
-                pidController.targetValue=AUTO_POS;
+                }
+            case AUTO: {
+                pidController.maxOutput = 1;
+                pidController.targetValue = AUTO_POS;
                 break;
-                case ARM_UP:
-                    pidController.targetValue = rowPosition[robot.currentRow];
+            }
+            case ARM_UP: {
+                pidController.maxOutput = 1;
+                pidController.targetValue = rowPosition[robot.currentRow];
+                break;
+            }
         }
 
         double powerLift = pidController.update(currentPosition);
@@ -88,10 +97,9 @@ public class ArmController {
         motor.setPower(powerLift);
     }
 
-    public void goToPos(double pos) {
-        pidController.targetValue = pos;
-        double powerLift = pidController.update(currentPosition);
-        //powerLift = Math.max(-1, Math.min(powerLift * 14 / robot.voltage, 1));
-        motor.setPower(powerLift);
+    public void goToPos(int pos) {
+        motor.setTargetPosition(pos);
+        motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        motor.setPower(0.6);
     }
 }

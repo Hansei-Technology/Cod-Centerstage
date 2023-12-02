@@ -64,18 +64,17 @@ public class TELEOP extends LinearOpMode {
             {
                 if(claw.statusLeft == ClawController.GripperStatus.CLOSED) {
                     claw.statusLeft = ClawController.GripperStatus.OPEN;
-                    if(robot.state==UniversalStates.State.ARM_UP) {
-                        robot.state= UniversalStates.State.MOVING;
-                    }
-                }else
+                } else {
                     claw.statusLeft = ClawController.GripperStatus.CLOSED;
+                }
             }
             if(stickyG2.right_bumper) //rightClaw
             {
-                if(claw.statusRight == ClawController.GripperStatus.CLOSED)
+                if(claw.statusRight == ClawController.GripperStatus.CLOSED) {
                     claw.statusRight = ClawController.GripperStatus.OPEN;
-                else
+                } else {
                     claw.statusRight = ClawController.GripperStatus.CLOSED;
+                }
             }
 
             //vrea si bogdy sa deschida clestele
@@ -117,35 +116,15 @@ public class TELEOP extends LinearOpMode {
             }
 
             //backdrop row selector
-            if(gamepad2.a) robot.currentRow = 4;
-            if(gamepad2.b) robot.currentRow = 7;
-            if(gamepad2.y) robot.currentRow = 10;
-            if(stickyG2.dpad_up) robot.currentRow++;
-            if(stickyG2.dpad_down) robot.currentRow--;
             robot.currentRow = Math.min(11, Math.max(robot.currentRow, 1));
 
             if(gamepad1.touchpad) avion.Lauch();
 
             //WARNING: UGLY CODE
-            if(stickyG1.dpad_right) {
-                if(robot.state == UniversalStates.State.READY_TO_HANG) {
-                    extension.targetPos = extension.HANG - 400; //TODO: SET THIS
-                } else {
-                    arm.motor.setTargetPosition(arm.HANG);
-                    arm.motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    arm.motor.setPower(1);
-                    extension.targetPos = extension.HANG;
-                    robot.state = UniversalStates.State.READY_TO_HANG;
-                }
-            }
-
             extension.update();
-            if(robot.state != UniversalStates.State.READY_TO_HANG)
-            {
                 claw.update();
                 joint.update();
                 arm.update();
-            }
 
             robot.previousState = robot.state;
 
