@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.teamcode.hardware;
+package org.firstinspires.ftc.teamcode.teamcode.util;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.Gamepad;

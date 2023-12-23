@@ -30,6 +30,13 @@ public class BackAndForth extends LinearOpMode {
 
     public static double DISTANCE = 50;
 
+    enum MODE {
+        DRIVER,
+        AUTO
+    }
+
+    public MODE mode = MODE.AUTO;
+
     @Override
     public void runOpMode() throws InterruptedException {
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
@@ -45,8 +52,30 @@ public class BackAndForth extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive() && !isStopRequested()) {
-            drive.followTrajectory(trajectoryForward);
-            drive.followTrajectory(trajectoryBackward);
+
+            switch(mode){
+                case AUTO: {
+                    drive.followTrajectory(trajectoryForward);
+                    drive.followTrajectory(trajectoryBackward);
+                    if(gamepad1.y) {
+                        mode = MODE.DRIVER;
+                    }
+                }
+                case DRIVER: {
+                        if (gamepad1.b) {
+                            mode = MODE.AUTO;
+                        }
+
+                        drive.setWeightedDrivePower(
+                                new Pose2d(
+                                        -gamepad1.left_stick_y,
+                                        -gamepad1.left_stick_x,
+                                        -gamepad1.right_stick_x
+                                )
+                        );
+                        break;
+                }
+            }
         }
     }
 }

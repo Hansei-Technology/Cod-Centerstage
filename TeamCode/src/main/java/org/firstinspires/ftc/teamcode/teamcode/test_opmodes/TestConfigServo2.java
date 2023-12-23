@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.teamcode.tests;
+package org.firstinspires.ftc.teamcode.teamcode.test_opmodes;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -31,7 +31,6 @@ public class TestConfigServo2 extends LinearOpMode
         waitForStart();
 
         while (opModeIsActive()){
-
                 servo.setPosition(power);
                 servo2.setPosition(power2);
         }
